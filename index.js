@@ -31,8 +31,7 @@ const svg = canvas.append('svg')
     .attr('height', 600)
 
 svg.append('rect')
-svg.append('rect')
-svg.append('rect')
+
 
 // next we join the data array with the rect element
 
@@ -42,9 +41,19 @@ svg.append('rect')
 //     .attr('height', val => val.height )
 //     .attr('fill', function(val) { return val.fill })
 
-
-const rect = svg.selectAll('rect')
+// Join data to rects
+const rects = svg.selectAll('rect')
     .data(data)
+
+// updating the elements already in the DOM
+rects.attr('width', val => val.width )
+    .attr('height', val => val.height )
+    .attr('fill', function(val) { return val.fill })
+
+
+// updating elements that have not yet enter the DOM
+rects.enter()
+    .append('rect')
     .attr('width', val => val.width )
     .attr('height', val => val.height )
     .attr('fill', function(val) { return val.fill })
