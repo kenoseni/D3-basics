@@ -4,23 +4,23 @@
 
 // console.log('>>>>>>>>>>>>>', a, '$$$$$$$$$$$$$$$$', b)
 
-const data = [
-    {
-        'width': 200,
-        'height': 100,
-        'fill': 'orange'
-    },
-    {
-        'width': 100,
-        'height': 60,
-        'fill': 'red'
-    },
-    {
-        'width': 50,
-        'height': 30,
-        'fill': 'green'
-    }
-]
+// const data = [
+//     {
+//         'width': 200,
+//         'height': 100,
+//         'fill': 'orange'
+//     },
+//     {
+//         'width': 100,
+//         'height': 60,
+//         'fill': 'red'
+//     },
+//     {
+//         'width': 50,
+//         'height': 30,
+//         'fill': 'green'
+//     }
+// ]
 
 // get the element with a class name canvas
 const canvas = d3.select('.canvas')
@@ -30,7 +30,28 @@ const svg = canvas.append('svg')
     .attr('width', 600)
     .attr('height', 600)
 
-svg.append('rect')
+// get json data
+d3.json("planets.json").then(data => {
+
+    const circles = svg.selectAll('circle')
+        .data(data)
+
+    // add attr to circles already in the DOM
+    circles.attr('cx', val => val.distance)
+        .attr('cy', 200)
+        .attr('r', val => val.radius)
+        .attr('fill', val => val.fill)
+
+    // add attr to circles not already in the DOM
+    circles.enter()
+        .append('circle')
+            .attr('cx', val => val.distance)
+            .attr('cy', 200)
+            .attr('r', val => val.radius)
+            .attr('fill', val => val.fill)
+})
+
+// svg.append('rect')
 
 
 // next we join the data array with the rect element
@@ -42,21 +63,21 @@ svg.append('rect')
 //     .attr('fill', function(val) { return val.fill })
 
 // Join data to rects
-const rects = svg.selectAll('rect')
-    .data(data)
+// const rects = svg.selectAll('rect')
+//     .data(data)
 
 // updating the elements already in the DOM
-rects.attr('width', val => val.width )
-    .attr('height', val => val.height )
-    .attr('fill', function(val) { return val.fill })
+// rects.attr('width', val => val.width )
+//     .attr('height', val => val.height )
+//     .attr('fill', function(val) { return val.fill })
 
 
 // updating elements that have not yet enter the DOM
-rects.enter()
-    .append('rect')
-    .attr('width', val => val.width )
-    .attr('height', val => val.height )
-    .attr('fill', function(val) { return val.fill })
+// rects.enter()
+//     .append('rect')
+//     .attr('width', val => val.width )
+//     .attr('height', val => val.height )
+//     .attr('fill', function(val) { return val.fill })
 
 
 // adding attributes to svg element
@@ -102,4 +123,3 @@ rects.enter()
 //     // Note!! we can use the style method to apply css style
 //     .style('font-weight', 800)
 //     .style('font-family', 'Poppins')
-
