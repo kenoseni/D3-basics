@@ -31,27 +31,110 @@ const svg = canvas.append('svg')
     .attr('height', 600)
 
 // get json data
-d3.json("planets.json").then(data => {
+// d3.json("planets.json").then(data => {
 
-    const circles = svg.selectAll('circle')
+//     const circles = svg.selectAll('circle')
+//         .data(data)
+
+//     // add attr to circles already in the DOM
+//     circles.attr('cx', val => val.distance)
+//         .attr('cy', 200)
+//         .attr('r', val => val.radius)
+//         .attr('fill', val => val.fill)
+
+//     // add attr to circles not already in the DOM
+//     circles.enter()
+//         .append('circle')
+//             .attr('cx', val => val.distance)
+//             .attr('cy', 200)
+//             .attr('r', val => val.radius)
+//             .attr('fill', val => val.fill)
+// })
+
+svg.append('rect')
+
+// create margins and dimension
+const margin = {
+    top: 20,
+    right: 20,
+    bottom: 100,
+    left: 100
+}
+const graphWidth = 600 - margin.right - margin.left
+const graphHeight = 600 - margin.top - margin.bottom
+
+const graph = svg.append('g')
+    .attr('width', graphWidth)
+    .attr('height', graphHeight)
+    .attr('transform', `translate(${margin.left}, ${margin.top})`) // moves it into the svg
+
+const xAxisGroup = graph.append('g')
+    .attr('transform', `translate(0, ${graphHeight})`)
+
+
+const yAxisGroup = graph.append('g')
+
+
+// Create bar chart
+d3.json('menu.json').then(data => {
+    const max = d3.max(data, val => val.orders)
+
+    // create linear scale
+    const y = d3.scaleLinear()
+        .domain([0, max])
+        .range([graphHeight, 0])
+
+    // const min = d3.min(data, val => val.orders)
+    // const max = d3.max(data, val => val.orders)
+
+    // const extent = d3.extent(data, val => val.orders)
+
+    // create band scale
+    const x = d3.scaleBand()
+        .domain(data.map(item => item.name))
+        .range([0, 500])
+        .paddingInner(0.2)
+        .paddingOuter(0.2)
+    
+    // join the data to rects
+    const rects = graph.selectAll('rects')
         .data(data)
+    
+    // add attr to rect already in the DOM
+    rects.attr('width', x.bandwidth)
+        .attr('height', val => graphHeight - y(val.orders))
+        .attr('fill', 'red')
+        .attr('x', val => x(val.name))
+        .attr('y', val => y(val.orders))
 
-    // add attr to circles already in the DOM
-    circles.attr('cx', val => val.distance)
-        .attr('cy', 200)
-        .attr('r', val => val.radius)
-        .attr('fill', val => val.fill)
+    // add attr to rect not already in the DOM
+    rects.enter()
+        .append('rect')
+            .attr('width', x.bandwidth)
+            .attr('height', val => graphHeight - y(val.orders))
+            .attr('fill', 'red')
+            .attr('x', val => x(val.name))
+            .attr('y', val => y(val.orders))
+    
+    // create and call the axis
+    const xAxis = d3.axisBottom(x)
+    const yAxis = d3.axisLeft(y)
+        .ticks(3)
+        .tickFormat(axisValue => axisValue + ' orders')
 
-    // add attr to circles not already in the DOM
-    circles.enter()
-        .append('circle')
-            .attr('cx', val => val.distance)
-            .attr('cy', 200)
-            .attr('r', val => val.radius)
-            .attr('fill', val => val.fill)
-})
+    // applying the axis so that they can be visible
+    xAxisGroup.call(xAxis)
+    yAxisGroup.call(yAxis)
 
-// svg.append('rect')
+    xAxisGroup.selectAll('text')
+        .attr('transform', 'rotate(-40)')
+        .attr('text-anchor', 'end')
+        .attr('fill', 'red')
+    
+    yAxisGroup.selectAll('text').attr('fill', 'red')
+    
+    
+}).catch((err) => err)
 
 
 // next we join the data array with the rect element
