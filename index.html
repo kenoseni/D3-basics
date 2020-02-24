@@ -21,6 +21,35 @@
         <!-- <line x1='300' y1='300' x2='200', y2='250' stroke='green'></line> -->
     <!-- </svg> -->
 
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-firestore.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-analytics.js"></script> -->
+
+    <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyCkV9T3c4r3qCukbqJPZyFvAClHMEvCw-Y",
+        authDomain: "d3-firebase-sola.firebaseapp.com",
+        databaseURL: "https://d3-firebase-sola.firebaseio.com",
+        projectId: "d3-firebase-sola",
+        storageBucket: "d3-firebase-sola.appspot.com",
+        messagingSenderId: "776818808228",
+        appId: "1:776818808228:web:298998e45fdef30fb05d31",
+        measurementId: "G-FZHMY5SHK2"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    // firebase.analytics();
+
+    // initialize database
+    const db = firebase.firestore()
+    </script>
+
+
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="index.js"></script>
  </body>

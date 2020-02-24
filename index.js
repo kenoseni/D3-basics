@@ -29,6 +29,7 @@ const canvas = d3.select('.canvas')
 const svg = canvas.append('svg')
     .attr('width', 600)
     .attr('height', 600)
+    
 
 // get json data
 // d3.json("planets.json").then(data => {
@@ -76,7 +77,14 @@ const yAxisGroup = graph.append('g')
 
 
 // Create bar chart
-d3.json('menu.json').then(data => {
+db.collection('dishes').get().then(res => {
+
+    var data = []
+    
+    res.forEach(doc => {
+        data.push(doc.data())
+    })
+
     const max = d3.max(data, val => val.orders)
 
     // create linear scale
