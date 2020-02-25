@@ -52,7 +52,7 @@ const svg = canvas.append('svg')
 //             .attr('fill', val => val.fill)
 // })
 
-svg.append('rect')
+// svg.append('rect')
 
 // create margins and dimension
 const margin = {
@@ -75,74 +75,116 @@ const xAxisGroup = graph.append('g')
 
 const yAxisGroup = graph.append('g')
 
+// create linear scale
+const y = d3.scaleLinear()
+    .range([graphHeight, 0])
 
-// Create bar chart
-db.collection('dishes').get().then(res => {
 
-    var data = []
-    
-    res.forEach(doc => {
-        data.push(doc.data())
-    })
+// create band scale
+const x = d3.scaleBand()
+    .range([0, 500])
+    .paddingInner(0.2)
+    .paddingOuter(0.2)
 
-    const max = d3.max(data, val => val.orders)
+// create the axes
+const xAxis = d3.axisBottom(x)
+const yAxis = d3.axisLeft(y)
+    .ticks(3)
+    .tickFormat(axisValue => axisValue + ' orders')
 
-    // create linear scale
-    const y = d3.scaleLinear()
-        .domain([0, max])
-        .range([graphHeight, 0])
+// update x-axis text
+xAxisGroup.selectAll('text')
+    .attr('transform', 'rotate(-40)')
+    .attr('text-anchor', 'end')
+    .attr('fill', 'red')
 
-    // const min = d3.min(data, val => val.orders)
-    // const max = d3.max(data, val => val.orders)
+// update y-axis text
+yAxisGroup.selectAll('text').attr('fill', 'red')
 
-    // const extent = d3.extent(data, val => val.orders)
+var data = []
 
-    // create band scale
-    const x = d3.scaleBand()
-        .domain(data.map(item => item.name))
-        .range([0, 500])
-        .paddingInner(0.2)
-        .paddingOuter(0.2)
-    
+// Create update function
+var update = (data) => {
+    // updating scale domains
+    y.domain([0, d3.max(data, val => val.orders)])
+    x.domain(data.map(item => item.name))
+
     // join the data to rects
-    const rects = graph.selectAll('rects')
+    const rects = graph.selectAll('rect')
         .data(data)
-    
+
+    // remove exit selection
+    rects.exit().remove()
+
     // add attr to rect already in the DOM
+    // update current shapes in DOM
     rects.attr('width', x.bandwidth)
         .attr('height', val => graphHeight - y(val.orders))
         .attr('fill', 'red')
         .attr('x', val => x(val.name))
         .attr('y', val => y(val.orders))
-
-    // add attr to rect not already in the DOM
-    rects.enter()
-        .append('rect')
-            .attr('width', x.bandwidth)
-            .attr('height', val => graphHeight - y(val.orders))
-            .attr('fill', 'red')
-            .attr('x', val => x(val.name))
-            .attr('y', val => y(val.orders))
     
-    // create and call the axis
-    const xAxis = d3.axisBottom(x)
-    const yAxis = d3.axisLeft(y)
-        .ticks(3)
-        .tickFormat(axisValue => axisValue + ' orders')
-
-    // applying the axis so that they can be visible
+    // add attr to rect not already in the DOM
+    rects.enter().append('rect')
+        .attr('width', x.bandwidth)
+        .attr('height', val => graphHeight - y(val.orders))
+        .attr('fill', 'red')
+        .attr('x', val => x(val.name))
+        .attr('y', val => y(val.orders))
+    
+    // applying the axes by calling so that they can be visible
     xAxisGroup.call(xAxis)
     yAxisGroup.call(yAxis)
+}
 
-    xAxisGroup.selectAll('text')
-        .attr('transform', 'rotate(-40)')
-        .attr('text-anchor', 'end')
-        .attr('fill', 'red')
+// Create bar chart
+db.collection('dishes').onSnapshot(res => {
+    res.docChanges().forEach(change => {
+
+        const doc = { ...change.doc.data(), id: change.doc.id, type: change.type }
+
+        switch (change.type) {
+            case 'added':
+                data.push(doc)
+                break;
+            case 'modified':
+                const index = data.findIndex(item => item.id == doc.id)
+                data[index] = doc
+                break;
+            case 'removed':
+                data = data.filter(item => item.id !== doc.id) 
+                break;
+            default:
+                break;  
+        }
+    })
+    update(data)
+})
+
+
+
+// db.collection('dishes').get().then(res => {
+
+//     var data = []
     
-    yAxisGroup.selectAll('text').attr('fill', 'red')
+//     res.forEach(doc => {
+//         data.push(doc.data())
+//     })
+
+//     update(data)
+
+//     d3.interval(() => {
+//         data[0].orders += 50
+//         // data.pop()
+//         // update(data)
+//     }, 3000)
+
+//     // const min = d3.min(data, val => val.orders)
+//     // const max = d3.max(data, val => val.orders)
+
+//     // const extent = d3.extent(data, val => val.orders)
     
-    
-}).catch((err) => err)
+// }).catch((err) => err)
 
 
 // next we join the data array with the rect element
@@ -214,3 +256,21 @@ db.collection('dishes').get().then(res => {
 //     // Note!! we can use the style method to apply css style
 //     .style('font-weight', 800)
 //     .style('font-family', 'Poppins')
+
+// D3 update pattern
+// const update = (data) => {
+//     // 1. update scales (domains) if they rely on our data
+//     y.domain([0,d3.max(data, val => val.orders)])
+
+//     // 2. join updated data to elements
+//     const rects = graph.selectAll('rect').data(data)
+
+//     // 3. remove unwanted (if any) shapes in the dom
+//     rects.exit().remove()
+
+//     // 4. update current shapes in the dom
+//     rects.attr(...etc)
+
+//     // 5. append the enter selection to the dom
+//     rects.enter().append('rect').attr(...etc)
+// }
